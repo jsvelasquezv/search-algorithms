@@ -1,0 +1,19 @@
+{
+  "name": "search_algorithms",
+  "version": "1.0.0",
+  "description": "Implementation of wall tracing and waypoint navigation. Search algorithms for discrete environments",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "search",
+    "algorithms",
+    "ia"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "~1.6.2"
+  }
+}
