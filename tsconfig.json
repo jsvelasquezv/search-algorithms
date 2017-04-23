@@ -1,16 +1,3 @@
-// {
-//     "compilerOptions": {
-//         "target": "ES5",
-//         "noImplicitAny": true,
-//         "removeComments": true,
-//         "preserveConstEnums": true,
-//         "out": "app/bundle.js",
-//         "sourceMap": true
-//     },
-//     "include": [
-//         "app/src/**/*"
-//     ]
-// }
 {
     "compilerOptions": {
         "module": "commonjs",

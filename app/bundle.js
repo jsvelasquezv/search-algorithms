@@ -70,31 +70,6 @@
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Board
- */
-var Board = (function () {
-    function Board() {
-    }
-    Board.prototype.printBoard = function () {
-    };
-    Board.prototype.getBoard = function () {
-    };
-    Board.prototype.saludar = function () {
-        console.log("Saludando");
-    };
-    return Board;
-}());
-exports.Board = Board;
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
  * jQuery JavaScript Library v3.2.1
  * https://jquery.com/
@@ -10352,17 +10327,114 @@ return jQuery;
 
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(0);
+/**
+ * Board
+ */
+var Board = (function () {
+    function Board() {
+        this.board_matrix = [[20]];
+        for (var i = 0; i < 20; i++) {
+            var arr = [20];
+            for (var j = 0; j < 20; j++) {
+                arr[j] = Board.EMPTY_PLACE;
+            }
+            this.board_matrix[i] = arr;
+        }
+    }
+    Board.prototype.getBoard = function () {
+        return this.board_matrix;
+    };
+    Board.prototype.getCssClass = function (type) {
+        var css_class = '';
+        switch (type) {
+            case Board.WALL_BLOCK:
+                css_class = Board.WALL_BLOCK_CLASS;
+                break;
+            case Board.AGENT:
+                css_class = Board.AGENT_CLASS;
+                break;
+            case Board.GOAL:
+                css_class = Board.GOAL_CLASS;
+                break;
+            default:
+                css_class = Board.EMPTY_PLACE_CLASS;
+                break;
+        }
+        return css_class;
+    };
+    // If save == true, the type will be save in board_matrix.
+    Board.prototype.drawPoint = function (x, y, type, save) {
+        var selector = "td[data-x=\"" + x + "\"][data-y=\"" + y + "\"]";
+        var domElement = $(selector);
+        $(domElement).attr("class", this.getCssClass(type));
+        if (save) {
+            this.board_matrix[x][y] = type;
+        }
+    };
+    return Board;
+}());
+// Posible values to represent board, walls, agent and goal
+Board.EMPTY_PLACE = 0;
+Board.WALL_BLOCK = 1;
+Board.AGENT = 2;
+Board.GOAL = 3;
+// Css classes assigned to each posible value in the board
+Board.EMPTY_PLACE_CLASS = "empty";
+Board.WALL_BLOCK_CLASS = "board-wall-block";
+Board.AGENT_CLASS = "agent";
+Board.GOAL_CLASS = "goal";
+exports.Board = Board;
+
+
+/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var $ = __webpack_require__(1);
-var Board_1 = __webpack_require__(0);
+var $ = __webpack_require__(0);
+var Board_1 = __webpack_require__(1);
 var board = new Board_1.Board();
-$("#hola").addClass("hola");
-board.saludar();
+$(document).on('click', "button[data-role='erase-cell']", function () {
+    $('td').off('click');
+    $('td').on('click', function () {
+        var x = $(this).data('x');
+        var y = $(this).data('y');
+        board.drawPoint(x, y, Board_1.Board.EMPTY_PLACE, true);
+    });
+});
+$(document).on('click', "button[data-role='place-walls']", function () {
+    $('td').off('click');
+    $('td').on('click', function () {
+        var x = $(this).data('x');
+        var y = $(this).data('y');
+        board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, true);
+    });
+});
+$(document).on('click', "button[data-role='place-agent']", function () {
+    $('td').off('click');
+    $('td').on('click', function () {
+        var x = $(this).data('x');
+        var y = $(this).data('y');
+        board.drawPoint(x, y, Board_1.Board.AGENT, true);
+    });
+});
+$(document).on('click', "button[data-role='place-goal']", function () {
+    $('td').off('click');
+    $('td').on('click', function () {
+        var x = $(this).data('x');
+        var y = $(this).data('y');
+        board.drawPoint(x, y, Board_1.Board.GOAL, true);
+    });
+});
 
 
 /***/ })
