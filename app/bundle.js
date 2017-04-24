@@ -63,11 +63,78 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(1);
+/**
+ * Board
+ */
+var Board = (function () {
+    function Board() {
+        this.board_matrix = [[20]];
+        for (var i = 0; i < 20; i++) {
+            var arr = [20];
+            for (var j = 0; j < 20; j++) {
+                arr[j] = Board.EMPTY_PLACE;
+            }
+            this.board_matrix[i] = arr;
+        }
+    }
+    Board.prototype.getBoard = function () {
+        return this.board_matrix;
+    };
+    Board.prototype.getCssClass = function (type) {
+        var css_class = '';
+        switch (type) {
+            case Board.WALL_BLOCK:
+                css_class = Board.WALL_BLOCK_CLASS;
+                break;
+            case Board.AGENT:
+                css_class = Board.AGENT_CLASS;
+                break;
+            case Board.GOAL:
+                css_class = Board.GOAL_CLASS;
+                break;
+            default:
+                css_class = Board.EMPTY_PLACE_CLASS;
+                break;
+        }
+        return css_class;
+    };
+    // If save == true, the type will be save in board_matrix.
+    Board.prototype.drawPoint = function (x, y, type, save) {
+        var selector = "td[data-x=\"" + x + "\"][data-y=\"" + y + "\"]";
+        var domElement = $(selector);
+        $(domElement).attr("class", this.getCssClass(type));
+        if (save) {
+            this.board_matrix[x][y] = type;
+        }
+    };
+    return Board;
+}());
+// Posible values to represent board, walls, agent and goal
+Board.EMPTY_PLACE = 0;
+Board.WALL_BLOCK = 1;
+Board.AGENT = 2;
+Board.GOAL = 3;
+// Css classes assigned to each posible value in the board
+Board.EMPTY_PLACE_CLASS = "empty";
+Board.WALL_BLOCK_CLASS = "board-wall-block";
+Board.AGENT_CLASS = "agent";
+Board.GOAL_CLASS = "goal";
+exports.Board = Board;
+
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
@@ -10327,82 +10394,91 @@ return jQuery;
 
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var $ = __webpack_require__(0);
-/**
- * Board
- */
-var Board = (function () {
-    function Board() {
-        this.board_matrix = [[20]];
-        for (var i = 0; i < 20; i++) {
-            var arr = [20];
-            for (var j = 0; j < 20; j++) {
-                arr[j] = Board.EMPTY_PLACE;
-            }
-            this.board_matrix[i] = arr;
-        }
-    }
-    Board.prototype.getBoard = function () {
-        return this.board_matrix;
-    };
-    Board.prototype.getCssClass = function (type) {
-        var css_class = '';
-        switch (type) {
-            case Board.WALL_BLOCK:
-                css_class = Board.WALL_BLOCK_CLASS;
-                break;
-            case Board.AGENT:
-                css_class = Board.AGENT_CLASS;
-                break;
-            case Board.GOAL:
-                css_class = Board.GOAL_CLASS;
-                break;
-            default:
-                css_class = Board.EMPTY_PLACE_CLASS;
-                break;
-        }
-        return css_class;
-    };
-    // If save == true, the type will be save in board_matrix.
-    Board.prototype.drawPoint = function (x, y, type, save) {
-        var selector = "td[data-x=\"" + x + "\"][data-y=\"" + y + "\"]";
-        var domElement = $(selector);
-        $(domElement).attr("class", this.getCssClass(type));
-        if (save) {
-            this.board_matrix[x][y] = type;
-        }
-    };
-    return Board;
-}());
-// Posible values to represent board, walls, agent and goal
-Board.EMPTY_PLACE = 0;
-Board.WALL_BLOCK = 1;
-Board.AGENT = 2;
-Board.GOAL = 3;
-// Css classes assigned to each posible value in the board
-Board.EMPTY_PLACE_CLASS = "empty";
-Board.WALL_BLOCK_CLASS = "board-wall-block";
-Board.AGENT_CLASS = "agent";
-Board.GOAL_CLASS = "goal";
-exports.Board = Board;
-
-
-/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var $ = __webpack_require__(0);
-var Board_1 = __webpack_require__(1);
+var Board_1 = __webpack_require__(0);
+/**
+ * Agent
+ */
+var Agent = (function () {
+    function Agent() {
+    }
+    Agent.prototype.bresenham = function (board, x0, y0, x1, y1) {
+        var x, y, dx, dy, p, incE, incNE, stepX, stepY;
+        // Determinate wich point would be used to start and wich to finish
+        dx = (x1 - x0);
+        dy = (y1 - y0);
+        if (dy < 0) {
+            dy = -dy;
+            stepY = -1;
+        }
+        else {
+            stepY = 1;
+        }
+        if (dx < 0) {
+            dx = -dx;
+            stepX = -1;
+        }
+        else {
+            stepX = 1;
+        }
+        x = x0;
+        y = y0;
+        setTimeout(board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false), 1000);
+        if (dx > dy) {
+            p = 2 * dy - dx;
+            incE = 2 * dy;
+            incNE = 2 * (dy - dx);
+            while (x != x1) {
+                x = x + stepX;
+                if (p < 0) {
+                    p = p + incE;
+                }
+                else {
+                    y = y + stepY;
+                    p = p + incNE;
+                }
+                setTimeout(board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false), 1000);
+            }
+        }
+        else {
+            p = 2 * dx - dy;
+            incE = 2 * dx;
+            incNE = 2 * (dx - dy);
+            while (y != y1) {
+                y = y + stepY;
+                if (p < 0) {
+                    p = p + incE;
+                }
+                else {
+                    x = x + stepX;
+                    p = p + incNE;
+                }
+                setTimeout(board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false), 1000);
+            }
+        }
+    };
+    return Agent;
+}());
+exports.Agent = Agent;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var $ = __webpack_require__(1);
+var Board_1 = __webpack_require__(0);
+var Agent_1 = __webpack_require__(2);
 var board = new Board_1.Board();
+var agent = new Agent_1.Agent();
 $(document).on('click', "button[data-role='erase-cell']", function () {
     $('td').off('click');
     $('td').on('click', function () {
@@ -10412,12 +10488,13 @@ $(document).on('click', "button[data-role='erase-cell']", function () {
     });
 });
 $(document).on('click', "button[data-role='place-walls']", function () {
-    $('td').off('click');
-    $('td').on('click', function () {
-        var x = $(this).data('x');
-        var y = $(this).data('y');
-        board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, true);
-    });
+    agent.bresenham(board, 0, 0, 3, 6);
+    // $('td').off('click');
+    // $('td').on('click', function() {
+    //     let x = $(this).data('x');
+    //     let y = $(this).data('y');
+    //     board.drawPoint(x, y, Board.WALL_BLOCK, true);
+    // });
 });
 $(document).on('click', "button[data-role='place-agent']", function () {
     $('td').off('click');

@@ -61,6 +61,7 @@ class Board {
             this.board_matrix[x][y] = type;
         }
     }
+
 }
 
 export { Board }

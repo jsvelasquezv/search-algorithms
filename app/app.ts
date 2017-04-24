@@ -1,7 +1,9 @@
 import * as $ from "jquery";
 import { Board } from "./src/Board";
+import { Agent } from "./src/Agent";
 
 let board = new Board();
+let agent = new Agent();
 
 $(document).on('click', "button[data-role='erase-cell']", function(){
     $('td').off('click');
@@ -13,12 +15,14 @@ $(document).on('click', "button[data-role='erase-cell']", function(){
 });
 
 $(document).on('click', "button[data-role='place-walls']", function(){
-    $('td').off('click');
-    $('td').on('click', function() {
-        let x = $(this).data('x');
-        let y = $(this).data('y');
-        board.drawPoint(x, y, Board.WALL_BLOCK, true);
-    });
+    agent.bresenham(board, 0,0, 3,6);
+    // $('td').off('click');
+    // $('td').on('click', function() {
+    //     let x = $(this).data('x');
+    //     let y = $(this).data('y');
+    //     board.drawPoint(x, y, Board.WALL_BLOCK, true);
+    // });
+
 });
 
 $(document).on('click', "button[data-role='place-agent']", function(){
