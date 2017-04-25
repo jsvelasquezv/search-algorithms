@@ -4,13 +4,14 @@ import { Agent } from "./src/Agent";
 
 let board = new Board();
 let agent = new Agent();
+let solutionPath = [];
 
 $(document).on('click', "button[data-role='erase-cell']", function(){
     $('td').off('click');
     $('td').on('click', function() {
         let x = $(this).data('x');
         let y = $(this).data('y');
-        board.drawPoint(x, y, Board.EMPTY_PLACE, true);
+        board.drawPoint(x, y, Board.EMPTY_PLACE, true, true);
     });
 });
 
@@ -20,7 +21,7 @@ $(document).on('click', "button[data-role='place-walls']", function(){
     $('td').on('click', function() {
         let x = $(this).data('x');
         let y = $(this).data('y');
-        board.drawPoint(x, y, Board.WALL_BLOCK, true);
+        board.drawPoint(x, y, Board.WALL_BLOCK, true, true);
     });
 
 });
@@ -30,7 +31,7 @@ $(document).on('click', "button[data-role='place-agent']", function(){
     $('td').on('click', function() {
         let x = $(this).data('x');
         let y = $(this).data('y');
-        board.drawPoint(x, y, Board.AGENT, true);
+        board.drawPoint(x, y, Board.AGENT, true, true);
     });
 });
 
@@ -39,10 +40,11 @@ $(document).on('click', "button[data-role='place-goal']", function(){
     $('td').on('click', function() {
         let x = $(this).data('x');
         let y = $(this).data('y');
-        board.drawPoint(x, y, Board.GOAL, true);
+        board.drawPoint(x, y, Board.GOAL, true, true);
     });
 });
 
 $(document).on('click', "button[data-role='calculate-goal']", function(){
-    agent.wallTracing(board);
+    solutionPath = agent.wallTracing(board);
+    board.drawSolutionPath(solutionPath);
 });

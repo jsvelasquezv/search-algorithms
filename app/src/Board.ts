@@ -7,14 +7,16 @@ class Board {
     // Posible values to represent board, walls, agent and goal
     static readonly EMPTY_PLACE: number = 0;
     static readonly WALL_BLOCK: number = 1;
-    static readonly AGENT:number = 2;
-    static readonly GOAL:number = 3;
+    static readonly AGENT: number = 2;
+    static readonly GOAL: number = 3;
+    static readonly SOLUTION_PATH: number = 4;
 
     // Css classes assigned to each posible value in the board
     static readonly EMPTY_PLACE_CLASS: string = "empty";
     static readonly WALL_BLOCK_CLASS: string = "board-wall-block";
     static readonly AGENT_CLASS: string = "agent";
     static readonly GOAL_CLASS: string = "goal";
+    static readonly SOLUTION_PATH_CLASS: string = "solution-path";
 
     private board_matrix: Array<Array<number>>;
 
@@ -45,6 +47,9 @@ class Board {
             case Board.GOAL:
                 css_class = Board.GOAL_CLASS;
                 break;
+            case Board.SOLUTION_PATH:
+                css_class = Board.SOLUTION_PATH_CLASS;
+                break;
             default:
                 css_class = Board.EMPTY_PLACE_CLASS;
                 break;
@@ -53,13 +58,23 @@ class Board {
     }
 
     // If save == true, the type will be save in board_matrix.
-    public drawPoint(x: number, y: number, type: number, save: boolean) {
+    public drawPoint(x: number, y: number, type: number, save: boolean, replaceCssClass: boolean) {
         let selector = `td[data-x="${x}"][data-y="${y}"]`;
         let domElement = $(selector);
-        $(domElement).attr("class", this.getCssClass(type));
+        if (replaceCssClass) {
+            $(domElement).attr("class", this.getCssClass(type));
+        } else {
+            $(domElement).addClass(this.getCssClass(type));            
+        }
         if (save) {
             this.board_matrix[x][y] = type;
         }
+    }
+
+    public drawSolutionPath(solutionPath: Array<Array<number>>) {
+        solutionPath.forEach(coords => {
+            this.drawPoint(coords[0], coords[1], Board.SOLUTION_PATH, false, false);
+        });
     }
 
 }

@@ -103,6 +103,9 @@ var Board = (function () {
             case Board.GOAL:
                 css_class = Board.GOAL_CLASS;
                 break;
+            case Board.SOLUTION_PATH:
+                css_class = Board.SOLUTION_PATH_CLASS;
+                break;
             default:
                 css_class = Board.EMPTY_PLACE_CLASS;
                 break;
@@ -110,13 +113,24 @@ var Board = (function () {
         return css_class;
     };
     // If save == true, the type will be save in board_matrix.
-    Board.prototype.drawPoint = function (x, y, type, save) {
+    Board.prototype.drawPoint = function (x, y, type, save, replaceCssClass) {
         var selector = "td[data-x=\"" + x + "\"][data-y=\"" + y + "\"]";
         var domElement = $(selector);
-        $(domElement).attr("class", this.getCssClass(type));
+        if (replaceCssClass) {
+            $(domElement).attr("class", this.getCssClass(type));
+        }
+        else {
+            $(domElement).addClass(this.getCssClass(type));
+        }
         if (save) {
             this.board_matrix[x][y] = type;
         }
+    };
+    Board.prototype.drawSolutionPath = function (solutionPath) {
+        var _this = this;
+        solutionPath.forEach(function (coords) {
+            _this.drawPoint(coords[0], coords[1], Board.SOLUTION_PATH, false, false);
+        });
     };
     return Board;
 }());
@@ -125,11 +139,13 @@ Board.EMPTY_PLACE = 0;
 Board.WALL_BLOCK = 1;
 Board.AGENT = 2;
 Board.GOAL = 3;
+Board.SOLUTION_PATH = 4;
 // Css classes assigned to each posible value in the board
 Board.EMPTY_PLACE_CLASS = "empty";
 Board.WALL_BLOCK_CLASS = "board-wall-block";
 Board.AGENT_CLASS = "agent";
 Board.GOAL_CLASS = "goal";
+Board.SOLUTION_PATH_CLASS = "solution-path";
 exports.Board = Board;
 
 
@@ -10482,108 +10498,123 @@ var Agent = (function () {
                 }
             }
         }
+        var solutionPath = [];
         var direction = Agent.FRONT_DIRECTION;
         var contador = 0;
-        do {
+        var path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1]);
+        for (var i = 0; i < path.length; i++) {
+            var point = path[i];
+            if (board_matrix[point[0]][point[1]] == Board_1.Board.WALL_BLOCK) {
+                obstacule = true;
+            }
+        }
+        if (obstacule == false) {
+            solutionPath = path;
+        }
+        while (obstacule) {
             var r = agentCoords[0];
             var c = agentCoords[1];
-            var path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1]);
+            if (direction == Agent.FRONT_DIRECTION) {
+                if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[0]--;
+                    direction = Agent.LEFT_DIRECTION;
+                }
+                else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[1]++;
+                    direction = Agent.FRONT_DIRECTION;
+                }
+                else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[0]++;
+                    direction = Agent.RIGHT_DIRECTION;
+                }
+                else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[1]--;
+                    direction = Agent.BACK_DIRECTION;
+                }
+            }
+            else if (direction == Agent.RIGHT_DIRECTION) {
+                if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[1]++;
+                    direction = Agent.FRONT_DIRECTION;
+                }
+                else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[0]++;
+                    direction = Agent.RIGHT_DIRECTION;
+                }
+                else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[1]--;
+                    direction = Agent.BACK_DIRECTION;
+                }
+                else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[0]--;
+                    direction = Agent.LEFT_DIRECTION;
+                }
+            }
+            else if (direction == Agent.BACK_DIRECTION) {
+                if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[0]++;
+                    direction = Agent.RIGHT_DIRECTION;
+                }
+                else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[1]--;
+                    direction = Agent.BACK_DIRECTION;
+                }
+                else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[0]--;
+                    direction = Agent.LEFT_DIRECTION;
+                }
+                else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[1]++;
+                    direction = Agent.FRONT_DIRECTION;
+                }
+            }
+            else if (direction == Agent.LEFT_DIRECTION) {
+                if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[1]--;
+                    direction = Agent.BACK_DIRECTION;
+                }
+                else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[0]--;
+                    direction = Agent.LEFT_DIRECTION;
+                }
+                else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[1]++;
+                    direction = Agent.FRONT_DIRECTION;
+                }
+                else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
+                    agentCoords[0]++;
+                    direction = Agent.RIGHT_DIRECTION;
+                }
+            }
+            // console.log(r,c);
+            solutionPath.push([r, c]);
+            // board.drawPoint(r, c, Board.SOLUTION_PATH, false);
+            path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1]);
+            var localObstacule = true;
             for (var i = 0; i < path.length; i++) {
                 var point = path[i];
-                if (board_matrix[point[0]][point[1]] == Board_1.Board.WALL_BLOCK) {
-                    obstacule = true;
+                if (board_matrix[point[0]][point[1]] != Board_1.Board.WALL_BLOCK) {
+                    localObstacule = localObstacule && true;
                 }
                 else {
-                    obstacule = false;
+                    localObstacule = localObstacule && false;
                 }
             }
-            // board.drawPoint(agentCoords[0], agentCoords[1], Board.WALL_BLOCK, false);
-            if (obstacule == false) {
-                // for (let i = 0; i < path.length; i++) {
-                //     let point = path[i];
-                // }
+            if (localObstacule) {
+                path.forEach(function (point) {
+                    solutionPath.push(point);
+                });
+                obstacule = false;
             }
             else {
-                console.log(r, c);
-                // let x = agentCoords[0];
-                // let y = agentCoords[1];
-                if (direction == Agent.FRONT_DIRECTION) {
-                    if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[0]--;
-                        direction = Agent.LEFT_DIRECTION;
-                    }
-                    else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[1]++;
-                        direction = Agent.FRONT_DIRECTION;
-                    }
-                    else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[0]++;
-                        direction = Agent.RIGHT_DIRECTION;
-                    }
-                    else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[1]--;
-                        direction = Agent.BACK_DIRECTION;
-                    }
-                }
-                else if (direction == Agent.RIGHT_DIRECTION) {
-                    if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[1]++;
-                        direction = Agent.FRONT_DIRECTION;
-                    }
-                    else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[0]++;
-                        direction = Agent.RIGHT_DIRECTION;
-                    }
-                    else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[1]--;
-                        direction = Agent.BACK_DIRECTION;
-                    }
-                    else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[0]--;
-                        direction = Agent.LEFT_DIRECTION;
-                    }
-                }
-                else if (direction == Agent.BACK_DIRECTION) {
-                    if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[0]++;
-                        direction = Agent.RIGHT_DIRECTION;
-                    }
-                    else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[1]--;
-                        direction = Agent.BACK_DIRECTION;
-                    }
-                    else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[0]--;
-                        direction = Agent.LEFT_DIRECTION;
-                    }
-                    else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[1]++;
-                        direction = Agent.FRONT_DIRECTION;
-                    }
-                }
-                else if (direction == Agent.LEFT_DIRECTION) {
-                    if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[1]--;
-                        direction = Agent.BACK_DIRECTION;
-                    }
-                    else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[0]--;
-                        direction = Agent.LEFT_DIRECTION;
-                    }
-                    else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[1]++;
-                        direction = Agent.FRONT_DIRECTION;
-                    }
-                    else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
-                        agentCoords[0]++;
-                        direction = Agent.RIGHT_DIRECTION;
-                    }
-                }
+                obstacule = true;
             }
-            contador++;
-            console.log(obstacule);
-            console.log(path);
-        } while (obstacule);
+        }
+        // console.log(solutionPath);
+        // solutionPath.forEach(coords => {
+        //     board.drawPoint(coords[0], coords[1], Board.SOLUTION_PATH, false);
+        // });
+        return solutionPath;
     };
     return Agent;
 }());
@@ -10606,12 +10637,13 @@ var Board_1 = __webpack_require__(0);
 var Agent_1 = __webpack_require__(2);
 var board = new Board_1.Board();
 var agent = new Agent_1.Agent();
+var solutionPath = [];
 $(document).on('click', "button[data-role='erase-cell']", function () {
     $('td').off('click');
     $('td').on('click', function () {
         var x = $(this).data('x');
         var y = $(this).data('y');
-        board.drawPoint(x, y, Board_1.Board.EMPTY_PLACE, true);
+        board.drawPoint(x, y, Board_1.Board.EMPTY_PLACE, true, true);
     });
 });
 $(document).on('click', "button[data-role='place-walls']", function () {
@@ -10620,7 +10652,7 @@ $(document).on('click', "button[data-role='place-walls']", function () {
     $('td').on('click', function () {
         var x = $(this).data('x');
         var y = $(this).data('y');
-        board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, true);
+        board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, true, true);
     });
 });
 $(document).on('click', "button[data-role='place-agent']", function () {
@@ -10628,7 +10660,7 @@ $(document).on('click', "button[data-role='place-agent']", function () {
     $('td').on('click', function () {
         var x = $(this).data('x');
         var y = $(this).data('y');
-        board.drawPoint(x, y, Board_1.Board.AGENT, true);
+        board.drawPoint(x, y, Board_1.Board.AGENT, true, true);
     });
 });
 $(document).on('click', "button[data-role='place-goal']", function () {
@@ -10636,11 +10668,12 @@ $(document).on('click', "button[data-role='place-goal']", function () {
     $('td').on('click', function () {
         var x = $(this).data('x');
         var y = $(this).data('y');
-        board.drawPoint(x, y, Board_1.Board.GOAL, true);
+        board.drawPoint(x, y, Board_1.Board.GOAL, true, true);
     });
 });
 $(document).on('click', "button[data-role='calculate-goal']", function () {
-    agent.wallTracing(board);
+    solutionPath = agent.wallTracing(board);
+    board.drawSolutionPath(solutionPath);
 });
 
 

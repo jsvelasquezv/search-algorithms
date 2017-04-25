@@ -94,30 +94,22 @@ class Agent {
                 }
             }
         }
+        let solutionPath = [];
         let direction = Agent.FRONT_DIRECTION;    
         let contador = 0;
-        do {
+        let path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1])
+        for (let i = 0; i < path.length; i++) {
+            let point = path[i];
+            if (board_matrix[point[0]][point[1]] == Board.WALL_BLOCK) {
+                obstacule = true;
+            }
+        }
+        if(obstacule == false) {
+            solutionPath = path;
+        }
+        while (obstacule) {
             let r = agentCoords[0];
             let c = agentCoords[1];
-            let path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1])
-            for (let i = 0; i < path.length; i++) {
-                let point = path[i];
-                if (board_matrix[point[0]][point[1]] == Board.WALL_BLOCK) {
-                    obstacule = true;
-                } else {
-                    obstacule = false;
-                }
-            }
-            // board.drawPoint(agentCoords[0], agentCoords[1], Board.WALL_BLOCK, false);
-            if (obstacule == false) {
-                // for (let i = 0; i < path.length; i++) {
-                //     let point = path[i];
-                    
-                // }
-            } else {
-                console.log(r,c);
-                // let x = agentCoords[0];
-                // let y = agentCoords[1];
                 if (direction == Agent.FRONT_DIRECTION) {
                     if (board_matrix[r-1][c] == Board.EMPTY_PLACE) {
                         agentCoords[0] --;
@@ -175,14 +167,35 @@ class Agent {
                         direction = Agent.RIGHT_DIRECTION;
                     }
                 }
+                // console.log(r,c);
+                solutionPath.push([r,c]);            
+                // board.drawPoint(r, c, Board.SOLUTION_PATH, false);
+                path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1]);
+                let localObstacule = true;
+                for (let i = 0; i < path.length; i++) {
+                    let point = path[i];
+                    if (board_matrix[point[0]][point[1]] != Board.WALL_BLOCK) {
+                        localObstacule = localObstacule && true;
+                    } else {
+                        localObstacule = localObstacule && false;
+                    }
+                }
+                if (localObstacule) {
+                    path.forEach(point => {
+                        solutionPath.push(point);
+                    });
+                    obstacule = false
+                } else {
+                    obstacule = true;
+                }
+                
             }
-            contador ++;
-            console.log(contador);
-            console.log(obstacule);
-            console.log(path);
-        } while (obstacule);
-        
-    }
+            // console.log(solutionPath);
+            // solutionPath.forEach(coords => {
+            //     board.drawPoint(coords[0], coords[1], Board.SOLUTION_PATH, false);
+            // });
+            return solutionPath;
+        }
 }
 
 export { Agent }
