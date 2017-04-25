@@ -10408,7 +10408,7 @@ var Agent = (function () {
     function Agent() {
     }
     Agent.prototype.bresenham = function (board, x0, y0, x1, y1) {
-        var x, y, dx, dy, p, incE, incNE, stepX, stepY;
+        var x, y, dx, dy, p, incE, incNE, stepX, stepY, path;
         // Determinate wich point would be used to start and wich to finish
         dx = (x1 - x0);
         dy = (y1 - y0);
@@ -10428,7 +10428,8 @@ var Agent = (function () {
         }
         x = x0;
         y = y0;
-        setTimeout(board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false), 1000);
+        board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false);
+        path = [[x, y]];
         if (dx > dy) {
             p = 2 * dy - dx;
             incE = 2 * dy;
@@ -10442,7 +10443,8 @@ var Agent = (function () {
                     y = y + stepY;
                     p = p + incNE;
                 }
-                setTimeout(board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false), 1000);
+                board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false);
+                path.push([x, y]);
             }
         }
         else {
@@ -10458,9 +10460,38 @@ var Agent = (function () {
                     x = x + stepX;
                     p = p + incNE;
                 }
-                setTimeout(board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false), 1000);
+                board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false);
+                path.push([x, y]);
             }
         }
+        console.log(path);
+        return path;
+    };
+    Agent.prototype.wallTracing = function (board) {
+        var board_matrix = board.getBoard();
+        var agentCoords = [];
+        var goalCoords = [];
+        var obstacule = false;
+        for (var i = 0; i < 20; i++) {
+            for (var j = 0; j < 20; j++) {
+                if (board_matrix[i][j] == Board_1.Board.AGENT) {
+                    agentCoords = [i, j];
+                }
+                if (board_matrix[i][j] == Board_1.Board.GOAL) {
+                    goalCoords = [i, j];
+                }
+            }
+        }
+        var path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1]);
+        for (var i = 0; i < path.length; i++) {
+            var point = path[i];
+            if (board_matrix[point[0]][point[1]] == Board_1.Board.WALL_BLOCK) {
+                obstacule = true;
+            }
+        }
+        console.log(obstacule);
+    };
+    Agent.prototype.calculateGoal = function () {
     };
     return Agent;
 }());
@@ -10488,13 +10519,13 @@ $(document).on('click', "button[data-role='erase-cell']", function () {
     });
 });
 $(document).on('click', "button[data-role='place-walls']", function () {
-    agent.bresenham(board, 0, 0, 3, 6);
-    // $('td').off('click');
-    // $('td').on('click', function() {
-    //     let x = $(this).data('x');
-    //     let y = $(this).data('y');
-    //     board.drawPoint(x, y, Board.WALL_BLOCK, true);
-    // });
+    // agent.bresenham(board, 0, 0, 3, 6);
+    $('td').off('click');
+    $('td').on('click', function () {
+        var x = $(this).data('x');
+        var y = $(this).data('y');
+        board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, true);
+    });
 });
 $(document).on('click', "button[data-role='place-agent']", function () {
     $('td').off('click');
@@ -10511,6 +10542,9 @@ $(document).on('click', "button[data-role='place-goal']", function () {
         var y = $(this).data('y');
         board.drawPoint(x, y, Board_1.Board.GOAL, true);
     });
+});
+$(document).on('click', "button[data-role='calculate-goal']", function () {
+    agent.wallTracing(board);
 });
 
 
