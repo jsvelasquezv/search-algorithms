@@ -4,6 +4,11 @@ import { Board } from "./Board";
  */
 class Agent {
     
+    public static readonly LEFT_DIRECTION = 2;
+    public static readonly RIGHT_DIRECTION = 6;
+    public static readonly FRONT_DIRECTION = 4;
+    public static readonly BACK_DIRECTION = 8;
+
     public bresenham(board: Board, x0: number, y0: number, x1: number, y1 :number) {
         let x: number,
             y: number,
@@ -89,22 +94,94 @@ class Agent {
                 }
             }
         }
-        let path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1])
-        for (let i = 0; i < path.length; i++) {
-            let point = path[i];
-            if (board_matrix[point[0]][point[1]] == Board.WALL_BLOCK) {
-                obstacule = true;
+        let direction = Agent.FRONT_DIRECTION;    
+        let contador = 0;
+        do {
+            let r = agentCoords[0];
+            let c = agentCoords[1];
+            let path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1])
+            for (let i = 0; i < path.length; i++) {
+                let point = path[i];
+                if (board_matrix[point[0]][point[1]] == Board.WALL_BLOCK) {
+                    obstacule = true;
+                } else {
+                    obstacule = false;
+                }
             }
-        }
-        // console.log(obstacule);
-    }
-
-    public moveAgent() {
+            // board.drawPoint(agentCoords[0], agentCoords[1], Board.WALL_BLOCK, false);
+            if (obstacule == false) {
+                // for (let i = 0; i < path.length; i++) {
+                //     let point = path[i];
+                    
+                // }
+            } else {
+                console.log(r,c);
+                // let x = agentCoords[0];
+                // let y = agentCoords[1];
+                if (direction == Agent.FRONT_DIRECTION) {
+                    if (board_matrix[r-1][c] == Board.EMPTY_PLACE) {
+                        agentCoords[0] --;
+                        direction = Agent.LEFT_DIRECTION;
+                    } else if (board_matrix[r][c+1] == Board.EMPTY_PLACE) {
+                        agentCoords[1] ++;
+                        direction = Agent.FRONT_DIRECTION;
+                    } else if (board_matrix[r+1][c] == Board.EMPTY_PLACE) {
+                        agentCoords[0] ++;
+                        direction = Agent.RIGHT_DIRECTION;
+                    } else if (board_matrix[r][c-1] == Board.EMPTY_PLACE) {
+                        agentCoords[1] --;
+                        direction = Agent.BACK_DIRECTION;
+                    }
+                } else if (direction == Agent.RIGHT_DIRECTION) {
+                    if (board_matrix[r][c+1] == Board.EMPTY_PLACE) {
+                        agentCoords[1] ++;
+                        direction = Agent.FRONT_DIRECTION;
+                    } else if (board_matrix[r+1][c] == Board.EMPTY_PLACE) {
+                        agentCoords[0] ++;
+                        direction = Agent.RIGHT_DIRECTION;
+                    } else if (board_matrix[r][c-1] == Board.EMPTY_PLACE) {
+                        agentCoords[1] --;
+                        direction = Agent.BACK_DIRECTION;
+                    } else if (board_matrix[r-1][c] == Board.EMPTY_PLACE) {
+                        agentCoords[0] --;
+                        direction = Agent.LEFT_DIRECTION;
+                    }
+                } else if (direction == Agent.BACK_DIRECTION) {
+                    if (board_matrix[r+1][c] == Board.EMPTY_PLACE) {
+                        agentCoords[0] ++;
+                        direction = Agent.RIGHT_DIRECTION;
+                    } else if (board_matrix[r][c-1] == Board.EMPTY_PLACE) {
+                        agentCoords[1] --;
+                        direction = Agent.BACK_DIRECTION;
+                    } else if (board_matrix[r-1][c] == Board.EMPTY_PLACE) {
+                        agentCoords[0] --;
+                        direction = Agent.LEFT_DIRECTION;
+                    } else if (board_matrix[r][c+1] == Board.EMPTY_PLACE) {
+                        agentCoords[1] ++;
+                        direction = Agent.FRONT_DIRECTION;
+                    }
+                } else if (direction == Agent.LEFT_DIRECTION) {
+                    if (board_matrix[r][c-1] == Board.EMPTY_PLACE) {
+                        agentCoords[1] --;
+                        direction = Agent.BACK_DIRECTION;
+                    } else if (board_matrix[r-1][c] == Board.EMPTY_PLACE) {
+                        agentCoords[0] --;
+                        direction = Agent.LEFT_DIRECTION;
+                    } else if (board_matrix[r][c+1] == Board.EMPTY_PLACE) {
+                        agentCoords[1] ++;
+                        direction = Agent.FRONT_DIRECTION;
+                    } else if (board_matrix[r+1][c] == Board.EMPTY_PLACE) {
+                        agentCoords[0] ++;
+                        direction = Agent.RIGHT_DIRECTION;
+                    }
+                }
+            }
+            contador ++;
+            console.log(contador);
+            console.log(obstacule);
+            console.log(path);
+        } while (obstacule);
         
-    }
-
-    public calculateGoal() {
-
     }
 }
 

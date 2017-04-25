@@ -10428,7 +10428,7 @@ var Agent = (function () {
         }
         x = x0;
         y = y0;
-        board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false);
+        // board.drawPoint(x, y, Board.WALL_BLOCK, false);
         path = [[x, y]];
         if (dx > dy) {
             p = 2 * dy - dx;
@@ -10443,7 +10443,7 @@ var Agent = (function () {
                     y = y + stepY;
                     p = p + incNE;
                 }
-                board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false);
+                // board.drawPoint(x, y, Board.WALL_BLOCK, false);
                 path.push([x, y]);
             }
         }
@@ -10460,11 +10460,11 @@ var Agent = (function () {
                     x = x + stepX;
                     p = p + incNE;
                 }
-                board.drawPoint(x, y, Board_1.Board.WALL_BLOCK, false);
+                // board.drawPoint(x, y, Board.WALL_BLOCK, false);
                 path.push([x, y]);
             }
         }
-        console.log(path);
+        // console.log(path);
         return path;
     };
     Agent.prototype.wallTracing = function (board) {
@@ -10482,19 +10482,115 @@ var Agent = (function () {
                 }
             }
         }
-        var path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1]);
-        for (var i = 0; i < path.length; i++) {
-            var point = path[i];
-            if (board_matrix[point[0]][point[1]] == Board_1.Board.WALL_BLOCK) {
-                obstacule = true;
+        var direction = Agent.FRONT_DIRECTION;
+        var contador = 0;
+        do {
+            var r = agentCoords[0];
+            var c = agentCoords[1];
+            var path = this.bresenham(board, agentCoords[0], agentCoords[1], goalCoords[0], goalCoords[1]);
+            for (var i = 0; i < path.length; i++) {
+                var point = path[i];
+                if (board_matrix[point[0]][point[1]] == Board_1.Board.WALL_BLOCK) {
+                    obstacule = true;
+                }
+                else {
+                    obstacule = false;
+                }
             }
-        }
-        console.log(obstacule);
-    };
-    Agent.prototype.calculateGoal = function () {
+            // board.drawPoint(agentCoords[0], agentCoords[1], Board.WALL_BLOCK, false);
+            if (obstacule == false) {
+                // for (let i = 0; i < path.length; i++) {
+                //     let point = path[i];
+                // }
+            }
+            else {
+                console.log(r, c);
+                // let x = agentCoords[0];
+                // let y = agentCoords[1];
+                if (direction == Agent.FRONT_DIRECTION) {
+                    if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[0]--;
+                        direction = Agent.LEFT_DIRECTION;
+                    }
+                    else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[1]++;
+                        direction = Agent.FRONT_DIRECTION;
+                    }
+                    else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[0]++;
+                        direction = Agent.RIGHT_DIRECTION;
+                    }
+                    else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[1]--;
+                        direction = Agent.BACK_DIRECTION;
+                    }
+                }
+                else if (direction == Agent.RIGHT_DIRECTION) {
+                    if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[1]++;
+                        direction = Agent.FRONT_DIRECTION;
+                    }
+                    else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[0]++;
+                        direction = Agent.RIGHT_DIRECTION;
+                    }
+                    else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[1]--;
+                        direction = Agent.BACK_DIRECTION;
+                    }
+                    else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[0]--;
+                        direction = Agent.LEFT_DIRECTION;
+                    }
+                }
+                else if (direction == Agent.BACK_DIRECTION) {
+                    if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[0]++;
+                        direction = Agent.RIGHT_DIRECTION;
+                    }
+                    else if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[1]--;
+                        direction = Agent.BACK_DIRECTION;
+                    }
+                    else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[0]--;
+                        direction = Agent.LEFT_DIRECTION;
+                    }
+                    else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[1]++;
+                        direction = Agent.FRONT_DIRECTION;
+                    }
+                }
+                else if (direction == Agent.LEFT_DIRECTION) {
+                    if (board_matrix[r][c - 1] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[1]--;
+                        direction = Agent.BACK_DIRECTION;
+                    }
+                    else if (board_matrix[r - 1][c] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[0]--;
+                        direction = Agent.LEFT_DIRECTION;
+                    }
+                    else if (board_matrix[r][c + 1] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[1]++;
+                        direction = Agent.FRONT_DIRECTION;
+                    }
+                    else if (board_matrix[r + 1][c] == Board_1.Board.EMPTY_PLACE) {
+                        agentCoords[0]++;
+                        direction = Agent.RIGHT_DIRECTION;
+                    }
+                }
+            }
+            contador++;
+            console.log(obstacule);
+            console.log(path);
+        } while (obstacule);
     };
     return Agent;
 }());
+Agent.LEFT_DIRECTION = 2;
+Agent.RIGHT_DIRECTION = 6;
+Agent.FRONT_DIRECTION = 4;
+Agent.BACK_DIRECTION = 8;
 exports.Agent = Agent;
 
 
