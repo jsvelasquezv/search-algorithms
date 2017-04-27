@@ -45,6 +45,12 @@
     background-size: 100px 100px;
 }
 
+.waypoint-node::after {
+    content: "\2605";
+    font-size: 1.5rem;
+    text-align: center;
+}
+
 .solution-path {
     background-color: mediumaquamarine;
 }

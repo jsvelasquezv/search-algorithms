@@ -196,6 +196,77 @@ class Agent {
             // });
             return solutionPath;
         }
+
+        public waypointNavigation(board: Board) {
+            let board_matrix = board.getBoard();
+            let nodeList = [];
+            let agentCoords = [];
+            let goalCoords = [];
+            for (let i = 0; i < 20; i++) {
+                for (let j = 0; j < 20; j++) {
+                    let element = board_matrix[i][j];
+                    if (element == Board.WAYPOINT_NODE) {
+                        nodeList.push([i,j]);
+                    }
+                    if (element == Board.AGENT) {
+                        agentCoords = [i,j];
+                    }
+                    if (element == Board.GOAL) {
+                        goalCoords = [i,j];
+                    }
+                }
+            }
+            let goalNode = [];
+            for (let i = 0; i < nodeList.length; i++) {
+                let path = this.bresenham(board, nodeList[i][0], nodeList[i][1], goalCoords[0], goalCoords[1]);
+                if (!this.hasCollitions(path, board)) {
+                    goalNode = nodeList[i];
+                }
+            }
+            let agentNode = [];
+            for (let i = 0; i < nodeList.length; i++) {
+                let path = this.bresenham(board, nodeList[i][0], nodeList[i][1], agentCoords[0], agentCoords[1]);
+                if (!this.hasCollitions(path, board)) {
+                    goalNode = nodeList[i];
+                }
+            }
+            let precalculatedPaths = [];
+            for (let i = 0; i < nodeList.length; i++) {
+                precalculatedPaths.push(this.findNodeConections(board, nodeList[i],nodeList));
+            }
+            precalculatedPaths.forEach(nodeConnection => {
+                nodeConnection.connections.forEach(point => {
+                    board.drawPoint(point[0], point[1], Board.SOLUTION_PATH, false, false);
+                });
+            });
+        }
+
+        public findNodeConections(board: Board, startingNode: Array<number>, nodeList: Array<Array<number>>) {
+            let conectingNodes = {node: startingNode, connections: []};
+            let connections = [];
+            nodeList.forEach(node => {
+                let path = this.bresenham(board, node[0], node[1], startingNode[0], startingNode[1]);
+                if (!this.hasCollitions(path, board)) {
+                    connections.push(node);
+                }
+            });
+            conectingNodes.connections = connections;
+            return conectingNodes;
+        }
+
+        public hasCollitions(path: Array<Array<number>>, board: Board) {
+            let board_matrix = board.getBoard();
+            let collisions = true;
+            for (let i = 0; i < path.length; i++) {
+                let coords = path[i];
+                if (board_matrix[coords[0]][coords[1]] != Board.WALL_BLOCK) {
+                    collisions = collisions && true;
+                } else {
+                    collisions = collisions && false;
+                }
+            }
+            return !collisions;
+        }
 }
 
 export { Agent }

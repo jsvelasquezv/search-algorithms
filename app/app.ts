@@ -44,7 +44,20 @@ $(document).on('click', "button[data-role='place-goal']", function(){
     });
 });
 
-$(document).on('click', "button[data-role='calculate-goal']", function(){
+$(document).on('click', "button[data-role='place-node']", function(){
+    $('td').off('click');
+    $('td').on('click', function() {
+        let x = $(this).data('x');
+        let y = $(this).data('y');
+        board.drawPoint(x, y, Board.WAYPOINT_NODE, true, true);
+    });
+});
+
+$(document).on('click', "button[data-role='wall-tracing']", function(){
     solutionPath = agent.wallTracing(board);
     board.drawSolutionPath(solutionPath);
+});
+
+$(document).on('click', "button[data-role='waypoint-navigation']", function(){
+    agent.waypointNavigation(board);
 });

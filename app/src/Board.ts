@@ -10,6 +10,7 @@ class Board {
     static readonly AGENT: number = 2;
     static readonly GOAL: number = 3;
     static readonly SOLUTION_PATH: number = 4;
+    static readonly WAYPOINT_NODE: number = 5;
 
     // Css classes assigned to each posible value in the board
     static readonly EMPTY_PLACE_CLASS: string = "empty";
@@ -17,6 +18,7 @@ class Board {
     static readonly AGENT_CLASS: string = "agent";
     static readonly GOAL_CLASS: string = "goal";
     static readonly SOLUTION_PATH_CLASS: string = "solution-path";
+    static readonly WAYPOINT_NODE_CLASS: string = "waypoint-node";
 
     private board_matrix: Array<Array<number>>;
 
@@ -49,6 +51,9 @@ class Board {
                 break;
             case Board.SOLUTION_PATH:
                 css_class = Board.SOLUTION_PATH_CLASS;
+                break;
+            case Board.WAYPOINT_NODE:
+                css_class = Board.WAYPOINT_NODE_CLASS;
                 break;
             default:
                 css_class = Board.EMPTY_PLACE_CLASS;

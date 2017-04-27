@@ -106,6 +106,9 @@ var Board = (function () {
             case Board.SOLUTION_PATH:
                 css_class = Board.SOLUTION_PATH_CLASS;
                 break;
+            case Board.WAYPOINT_NODE:
+                css_class = Board.WAYPOINT_NODE_CLASS;
+                break;
             default:
                 css_class = Board.EMPTY_PLACE_CLASS;
                 break;
@@ -140,12 +143,14 @@ Board.WALL_BLOCK = 1;
 Board.AGENT = 2;
 Board.GOAL = 3;
 Board.SOLUTION_PATH = 4;
+Board.WAYPOINT_NODE = 5;
 // Css classes assigned to each posible value in the board
 Board.EMPTY_PLACE_CLASS = "empty";
 Board.WALL_BLOCK_CLASS = "board-wall-block";
 Board.AGENT_CLASS = "agent";
 Board.GOAL_CLASS = "goal";
 Board.SOLUTION_PATH_CLASS = "solution-path";
+Board.WAYPOINT_NODE_CLASS = "waypoint-node";
 exports.Board = Board;
 
 
@@ -10616,6 +10621,76 @@ var Agent = (function () {
         // });
         return solutionPath;
     };
+    Agent.prototype.waypointNavigation = function (board) {
+        var board_matrix = board.getBoard();
+        var nodeList = [];
+        var agentCoords = [];
+        var goalCoords = [];
+        for (var i = 0; i < 20; i++) {
+            for (var j = 0; j < 20; j++) {
+                var element = board_matrix[i][j];
+                if (element == Board_1.Board.WAYPOINT_NODE) {
+                    nodeList.push([i, j]);
+                }
+                if (element == Board_1.Board.AGENT) {
+                    agentCoords = [i, j];
+                }
+                if (element == Board_1.Board.GOAL) {
+                    goalCoords = [i, j];
+                }
+            }
+        }
+        var goalNode = [];
+        for (var i = 0; i < nodeList.length; i++) {
+            var path = this.bresenham(board, nodeList[i][0], nodeList[i][1], goalCoords[0], goalCoords[1]);
+            if (!this.hasCollitions(path, board)) {
+                goalNode = nodeList[i];
+            }
+        }
+        var agentNode = [];
+        for (var i = 0; i < nodeList.length; i++) {
+            var path = this.bresenham(board, nodeList[i][0], nodeList[i][1], agentCoords[0], agentCoords[1]);
+            if (!this.hasCollitions(path, board)) {
+                goalNode = nodeList[i];
+            }
+        }
+        var precalculatedPaths = [];
+        for (var i = 0; i < nodeList.length; i++) {
+            precalculatedPaths.push(this.findNodeConections(board, nodeList[i], nodeList));
+        }
+        precalculatedPaths.forEach(function (nodeConnection) {
+            nodeConnection.connections.forEach(function (point) {
+                board.drawPoint(point[0], point[1], Board_1.Board.SOLUTION_PATH, false, false);
+            });
+        });
+    };
+    Agent.prototype.findNodeConections = function (board, startingNode, nodeList) {
+        var _this = this;
+        var conectingNodes = { node: startingNode, connections: [] };
+        var connections = [];
+        nodeList.forEach(function (node) {
+            var path = _this.bresenham(board, node[0], node[1], startingNode[0], startingNode[1]);
+            if (!_this.hasCollitions(path, board)) {
+                connections.push(node);
+            }
+        });
+        conectingNodes.connections = connections;
+        return conectingNodes;
+    };
+    Agent.prototype.hasCollitions = function (path, board) {
+        var board_matrix = board.getBoard();
+        var collisions = true;
+        for (var i = 0; i < path.length; i++) {
+            var coords = path[i];
+            if (board_matrix[coords[0]][coords[1]] != Board_1.Board.WALL_BLOCK) {
+                collisions = collisions && true;
+            }
+            else {
+                collisions = collisions && false;
+            }
+        }
+        return !collisions;
+    };
     return Agent;
 }());
 Agent.LEFT_DIRECTION = 2;
@@ -10671,9 +10746,20 @@ $(document).on('click', "button[data-role='place-goal']", function () {
         board.drawPoint(x, y, Board_1.Board.GOAL, true, true);
     });
 });
-$(document).on('click', "button[data-role='calculate-goal']", function () {
+$(document).on('click', "button[data-role='place-node']", function () {
+    $('td').off('click');
+    $('td').on('click', function () {
+        var x = $(this).data('x');
+        var y = $(this).data('y');
+        board.drawPoint(x, y, Board_1.Board.WAYPOINT_NODE, true, true);
+    });
+});
+$(document).on('click', "button[data-role='wall-tracing']", function () {
     solutionPath = agent.wallTracing(board);
     board.drawSolutionPath(solutionPath);
+});
+$(document).on('click', "button[data-role='waypoint-navigation']", function () {
+    agent.waypointNavigation(board);
 });
 
 
